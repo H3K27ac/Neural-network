@@ -11,7 +11,9 @@ class DenseLayer extends Layer {
         super(inputSize,outputSize);
         this.weights = this.initializeWeightMatrix(inputSize,outputSize);
         this.biases = new Array(outputSize).fill(0);
-        this.neurons = null;
+        this.inputNeurons = null;
+        this.outputCost = null;
+        this.inputCost = null;
     }
 
     initializeWeightMatrix(inputSize,outputSize) {
@@ -20,13 +22,30 @@ class DenseLayer extends Layer {
     }
 
     forward(neurons) {
-        this.neurons = neurons;
+        this.inputNeurons = neurons;
         let layerOutput = this.matrixVectorProduct(this.weights,neurons);
         layerOutput = this.vectorVectorSum(layerOutput,this.biases);
         return layerOutput;
     }
 
-    backward() {}
+    backward(outputCost) {
+        this.outputCost = outputCost;
+        this.inputCost = this.matrixVectorProduct(this.matrixTranspose(this.weights),outputCost);
+    }
+
+    updateWeights(learningRate) {
+        for (let i = 0; i < this.inputSize; i++) {
+            for (let j = 0; j < this.outputSize; j++) {
+                this.weights[i * this.outputSize + j] += learningRate * this.inputs[i] * this.outputCost[j];
+            }
+        }
+    }
+
+    updateBiases(learningRate) {
+        for (let i = 0; i < this.outputSize; i++) {
+            this.biases[i] += learningRate * this.outputCost[i];
+        }
+    }
 
     matrixVectorProduct(matrix,vector) {
         let outputVector = [];
@@ -46,6 +65,18 @@ class DenseLayer extends Layer {
             vector1[i] += vector2[i];
         }
         return vector1;
+    }
+
+    matrixTranspose(matrix) {
+        let outputMatrix = new Array(matrix.length);
+        const rows = this.outputSize;
+        const cols = this.inputSize;
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                outputMatrix[j * rows + i] = matrix[i * cols + j];
+            }
+        }
+        return outputMatrix;
     }
 }
 
