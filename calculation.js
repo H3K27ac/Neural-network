@@ -58,5 +58,29 @@ class ActivationLayer extends Layer {
 }
 
 class Network {
-    constructor() {}
+    constructor() {
+        this.layers = [];
+    }
+
+    initializeNetworkArchitecture(architecture) {
+        // archiecture = [["type",size],...]
+        for (let i = 0; i < architecture.length; i++) {
+            switch (architecture[i][0]) {
+                case "dense":
+                    this.layers.push(new DenseLayer(architecture[i][1],architecture[i][2]));
+                break;
+                case "activation":
+                    //
+                break;
+            }
+        }
+    }
+
+    feedForward(input) {
+        let output = input;
+        for (let layer of this.layers) {
+            output = layer.forward(output);
+        }
+        return output;
+    }
 }
