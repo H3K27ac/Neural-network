@@ -10,7 +10,6 @@ class DenseLayer extends Layer {
     constructor(inputSize, outputSize) {
         super(inputSize, outputSize);
         this.weights = new Array(inputSize * outputSize).fill(0);
-        // this.initializeWeightMatrix(inputSize,outputSize);
         this.biases = new Array(outputSize).fill(0);
         this.layerInput = null;
         this.outputCost = null;
