@@ -71,12 +71,16 @@ class ActivationLayer extends Layer {
         // f'(z)
         return elementWiseVectorProduct(outputCost, this.layerInput.map((value, index) => this.derivativeFunction(value, this.layerOutput[index])));
     }
+
+    updateWeights() {} // Unused
+    updateBiases() {} // Unused
 }
 
 class Network {
     constructor() {
         this.layers = [];
         this.outputNeurons = null;
+        this.learningRate = 0.01;
     }
 
     initializeNetworkArchitecture(architecture) {
@@ -108,6 +112,13 @@ class Network {
         let outputCost = subtractVectors(targets, this.outputNeurons);
         for (let i = this.layers.length - 1; i >= 0; i--) {
             outputCost = this.layers[i].backward(outputCost);
+        }
+    }
+
+    updateParameters() {
+        for (let layer of this.layers) {
+            layer.updateWeights(this.learningRate);
+            layer.updateBiases(this.learningRate);
         }
     }
 
