@@ -82,13 +82,16 @@ class Network {
     initializeNetworkArchitecture(architecture) {
         // archiecture = [["type",size],...]
         for (let i = 0; i < architecture.length; i++) {
-            switch (architecture[i][0]) {
+            const [type, ...params] = architecture[i];
+            switch (type) {
                 case "dense":
-                    this.layers.push(new DenseLayer(architecture[i][1],architecture[i][2]));
-                break;
+                    this.layers.push(new DenseLayer(...params));
+                    break;
                 case "activation":
-                    this.layers.push(new ActivationLayer(architecture[i][1]));
-                break;
+                    this.layers.push(new ActivationLayer(...params));
+                    break;
+                default:
+                    // Error
             }
         }
     }
