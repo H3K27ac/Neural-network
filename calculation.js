@@ -37,6 +37,7 @@ class DenseLayer extends Layer {
         for (let i = 0; i < this.outputSize; i++) {
             for (let j = 0; j < this.inputSize; j++) {
                 this.weights[i * this.inputSize + j] += learningRate * this.inputs[j] * this.outputCost[i];
+                // This is an outer product, include this as a function
             }
         }
     }
@@ -50,9 +51,21 @@ class ActivationLayer extends Layer {
     constructor(size) {
         super(size,size);
         this.layerInput = null;
+        this.outputCost = null;
     }
 
     initializeActivationFunction() {}
+
+    forward(layerInput) {
+        this.layerInput = layerInput;
+        // Apply activation function
+    }
+
+    backward(outputCost) {
+        this.outputCost = outputCost;
+        // f'(z)
+        return // Element-wise product between outputCost and f'(z)
+    }
 }
 
 class Network {
