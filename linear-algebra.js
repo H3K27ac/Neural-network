@@ -53,12 +53,12 @@ class Matrix {
     }
 
     static transpose(matrix) {
-        let outputMatrix = new Array(matrix.elements.length);
-        for (let i = 0; i < matrix.rows; i++) {
-            for (let j = 0; j < matrix.columns; j++) {
-                outputMatrix[j * matrix.rows + i] = matrix[i * matrix.columns + j];
+        let outputMatrix = [];
+        for (let i = 0; i < matrix.columns; i++) {
+            for (let j = 0; j < matrix.rows; j++) {
+                outputMatrix.push(matrix.elements[j * matrix.columns + i]);
             }
         }
-        return new Matrix(outputMatrix.rows);
+        return new Matrix(outputMatrix, matrix.rows);
     }
 }
