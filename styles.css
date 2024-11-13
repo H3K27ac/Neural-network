@@ -9,13 +9,20 @@ body {
     color: white;
 }
 
+.column {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 10px;
+    box-sizing: border-box;
+    border-right: 2px solid white;
+    height: 100%;
+}
+
 .panel {
-    position: absolute;
     background-color: black;
     border: 1px solid white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     padding: 10px;
-    color: white;
+    display: flex;
+    flex-direction: column;
 }
