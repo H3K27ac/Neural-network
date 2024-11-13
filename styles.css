@@ -3,6 +3,19 @@ body {
     font-size: 20px;
     text-align: center;
     align-items: center;
+    margin: 0;
+    padding: 0;
     background-color: black;
+    color: white;
+}
+
+.panel {
+    position: absolute;
+    background-color: black;
+    border: 1px solid white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
     color: white;
 }
