@@ -14,8 +14,8 @@ function createPanel(id, left, top, width, height, label) {
 }
 
 function updateLayout() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const width = screen.width;
+    const height = screen.height;
 
     const existingPanels = document.querySelectorAll('.panel');
     existingPanels.forEach(panel => panel.remove());
