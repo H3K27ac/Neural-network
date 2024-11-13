@@ -110,4 +110,8 @@ class Network {
             outputCost = this.layers[i].backward(outputCost);
         }
     }
+
+    meanSquaredError(targets) {
+        return targets.map((value, index) => Math.pow(value - this.outputNeurons[index], 2)).reduce((sum, value) => sum + value, 0) / targets.length;
+    }
 }
