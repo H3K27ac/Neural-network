@@ -3,6 +3,11 @@ function addVectors(vector1, vector2) {
     return vector1.map((value, index) => value + vector2[index]);
 }
 
+function subtractVectors(vector1, vector2) {
+    if (vector1.length !== vector2.length) {} // Error
+    return vector1.map((value, index) => value - vector2[index]);
+}
+
 function elementWiseVectorProduct(vector1, vector2) {
     if (vector1.length !== vector2.length) {} // Error
     return vector1.map((value, index) => value * vector2[index]);

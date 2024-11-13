@@ -79,6 +79,7 @@ class ActivationLayer extends Layer {
 class Network {
     constructor() {
         this.layers = [];
+        this.outputNeurons = null;
     }
 
     initializeNetworkArchitecture(architecture) {
@@ -89,22 +90,22 @@ class Network {
                     this.layers.push(new DenseLayer(architecture[i][1],architecture[i][2]));
                 break;
                 case "activation":
-                    //
+                    this.layers.push(new ActivationLayer(architecture[i][1]));
                 break;
             }
         }
     }
 
-    feedForward(input) {
-        let output = input;
+    feedForward(inputNeurons) {
+        let output = inputNeurons;
         for (let layer of this.layers) {
             output = layer.forward(output);
         }
-        return output;
+        this.outputNeurons = output;
     }
 
-    backpropagate() {
-        let outputCost // initial cost
+    backpropagate(targets) {
+        let outputCost = subtractVectors(targets, this.outputNeurons);
         for (let i = this.layers.length - 1; i >= 0; i--) {
             outputCost = this.layers[i].backward(outputCost);
         }
