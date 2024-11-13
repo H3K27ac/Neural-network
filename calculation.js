@@ -52,19 +52,27 @@ class ActivationLayer extends Layer {
         super(size,size);
         this.layerInput = null;
         this.outputCost = null;
+        this.activationFunction = null;
+        this.derivativeFunction = null;
     }
 
-    initializeActivationFunction() {}
+    initializeActivationFunction(activationType) {
+        this.activationFunction = activationFunctions[activationType];
+        this.derivativeFunction = derivativeActivationFunctions[activationType];
+
+        if (!this.activationFunction || !this.derivativeFunction) {} // Error
+    }
 
     forward(layerInput) {
         this.layerInput = layerInput;
         // Apply activation function
+        return layerInput.map(this.activationFunction);
     }
 
     backward(outputCost) {
         this.outputCost = outputCost;
         // f'(z)
-        return // Element-wise product between outputCost and f'(z)
+        return elementWiseVectorProduct(outputCost,this.layerInput.map(this.derivativeFunction));
     }
 }
 

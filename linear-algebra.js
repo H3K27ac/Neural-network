@@ -1,20 +1,27 @@
-function addVectors(vector1,vector2) {
+function addVectors(vector1, vector2) {
     if (vector1.length !== vector2.length) {} // Error
     return vector1.map((value, index) => value + vector2[index]);
+}
+
+function elementWiseVectorProduct(vector1, vector2) {
+    if (vector1.length !== vector2.length) {} // Error
+    return vector1.map((value, index) => value * vector2[index]);
 }
 
 function scalarMultiplyVector(vector, scalar) {
     return vector.map(value => value * scalar);
 }
 
+
+
 class Matrix {
-    constructor(elements,columns) {
+    constructor(elements, columns) {
         this.elements = elements;
         this.columns = columns;
         this.rows = elements.length / stride;
     }
 
-    static multiplyVector(matrix,vector) {
+    static multiplyVector(matrix, vector) {
         let outputVector = [];
         for (let i = 0; i < matrix.rows; i++) {
             let sum = 0;
