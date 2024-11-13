@@ -5,7 +5,7 @@ const activationFunctions = {
 };
 
 const derivativeActivationFunctions = {
-    sigmoid: (a) => a * (1 - a),
-    relu: (z) => (z > 0 ? 1 : 0),
-    tanh: (a) => 1 - Math.pow(a, 2)
+    sigmoid: (_, a) => a * (1 - a),
+    relu: (z, _) => (z > 0 ? 1 : 0),
+    tanh: (_, a) => 1 - Math.pow(a, 2)
 }

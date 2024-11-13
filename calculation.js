@@ -46,6 +46,7 @@ class ActivationLayer extends Layer {
     constructor(size) {
         super(size,size);
         this.layerInput = null;
+        this.layerOutput = null;
         this.outputCost = null;
         this.activationFunction = null;
         this.derivativeFunction = null;
@@ -61,13 +62,14 @@ class ActivationLayer extends Layer {
     forward(layerInput) {
         this.layerInput = layerInput;
         // Apply activation function
-        return layerInput.map(this.activationFunction);
+        this.layerOutput = layerInput.map(this.activationFunction);
+        return this.layerOutput;
     }
 
     backward(outputCost) {
         this.outputCost = outputCost;
         // f'(z)
-        return elementWiseVectorProduct(outputCost,this.layerInput.map(this.derivativeFunction));
+        return elementWiseVectorProduct(outputCost, this.layerInput.map((value, index) => this.derivativeFunction(value, this.layerOutput[index])));
     }
 }
 
