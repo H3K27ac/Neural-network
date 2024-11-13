@@ -17,13 +17,23 @@ function scalarMultiplyVector(vector, scalar) {
     return vector.map(value => value * scalar);
 }
 
-
+function outerProduct(vector1, vector2) {
+    let result = [];
+    
+    for (let i = 0; i < vector1.length; i++) {
+      for (let j = 0; j < vector2.length; j++) {
+        result.push(vector1[i] * vector2[j]);
+      }
+    }
+  
+    return new Matrix(result, vector2.length);
+}
 
 class Matrix {
     constructor(elements, columns) {
         this.elements = elements;
         this.columns = columns;
-        this.rows = elements.length / stride;
+        this.rows = elements.length / columns;
     }
 
     static multiplyVector(matrix, vector) {
@@ -36,6 +46,10 @@ class Matrix {
             outputVector.push(sum);
         }
         return outputVector;
+    }
+
+    static elementWiseSum(matrix1, matrix2) {
+        return new Matrix(matrix1.elements.map((value, index) => value + matrix2.elements[index]), matrix1.columns);
     }
 
     static transpose(matrix) {

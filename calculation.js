@@ -34,12 +34,7 @@ class DenseLayer extends Layer {
     }
 
     updateWeights(learningRate) {
-        for (let i = 0; i < this.outputSize; i++) {
-            for (let j = 0; j < this.inputSize; j++) {
-                this.weights[i * this.inputSize + j] += learningRate * this.inputs[j] * this.outputCost[i];
-                // This is an outer product, include this as a function
-            }
-        }
+        this.weights = Matrix.elementWiseSum(outerProduct(scalarMultiplyVector(this.outputCost, learningRate), this.layerInput), this.weights);
     }
 
     updateBiases(learningRate) {
