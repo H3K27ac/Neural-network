@@ -3,6 +3,10 @@ function addVectors(vector1,vector2) {
     return vector1.map((value, index) => value + vector2[index]);
 }
 
+function scalarMultiplyVector(vector, scalar) {
+    return vector.map(value => value * scalar);
+}
+
 class Matrix {
     constructor(elements,columns) {
         this.elements = elements;

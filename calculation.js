@@ -12,7 +12,7 @@ class DenseLayer extends Layer {
         this.weights = new Matrix(new Array(inputSize*outputSize).fill(0));
         // this.initializeWeightMatrix(inputSize,outputSize);
         this.biases = new Array(outputSize).fill(0);
-        this.inputNeurons = null;
+        this.layerInput = null;
         this.outputCost = null;
     }
 
@@ -22,7 +22,7 @@ class DenseLayer extends Layer {
     }
 
     forward(neurons) {
-        this.inputNeurons = neurons;
+        this.layerInput = neurons;
         let layerOutput = Matrix.multiplyVector(this.weights,neurons);
         layerOutput = addVectors(layerOutput,this.biases);
         return layerOutput;
@@ -34,23 +34,22 @@ class DenseLayer extends Layer {
     }
 
     updateWeights(learningRate) {
-        for (let i = 0; i < this.inputSize; i++) {
-            for (let j = 0; j < this.outputSize; j++) {
-                this.weights[i * this.outputSize + j] += learningRate * this.inputs[i] * this.outputCost[j];
+        for (let i = 0; i < this.outputSize; i++) {
+            for (let j = 0; j < this.inputSize; j++) {
+                this.weights[i * this.inputSize + j] += learningRate * this.inputs[j] * this.outputCost[i];
             }
         }
     }
 
     updateBiases(learningRate) {
-        for (let i = 0; i < this.outputSize; i++) {
-            this.biases[i] += learningRate * this.outputCost[i];
-        }
+        this.biases = addVectors(this.biases,scalarMultiplyVector(this.outputCost,learningRate));
     }
 }
 
 class ActivationLayer extends Layer {
     constructor(size) {
         super(size,size);
+        this.layerInput = null;
     }
 
     initializeActivationFunction() {}
@@ -81,5 +80,12 @@ class Network {
             output = layer.forward(output);
         }
         return output;
+    }
+
+    backpropagate() {
+        let outputCost // initial cost
+        for (let i = this.layers.length - 1; i >= 0; i--) {
+            outputCost = this.layers[i].backward(outputCost);
+        }
     }
 }
