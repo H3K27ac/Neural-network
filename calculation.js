@@ -7,30 +7,30 @@ class Layer {
 }
 
 class DenseLayer extends Layer {
-    constructor(inputSize,outputSize) {
-        super(inputSize,outputSize);
-        this.weights = new Matrix(new Array(inputSize*outputSize).fill(0));
+    constructor(inputSize, outputSize) {
+        super(inputSize, outputSize);
+        this.weights = new Array(inputSize * outputSize).fill(0);
         // this.initializeWeightMatrix(inputSize,outputSize);
         this.biases = new Array(outputSize).fill(0);
         this.layerInput = null;
         this.outputCost = null;
     }
 
-    initializeWeightMatrix(inputSize,outputSize) {
-        return new Array(inputSize*outputSize).fill(0);
-        // Stride = outputSize
+    xavierInitalization() {
+        const limit = Math.sqrt(6 / (this.inputSize + this.outputSize));
+        this.weights = new Matrix(this.weights.map(() => Math.random() * 2 * limit - limit), this.inputSize);
     }
 
-    forward(neurons) {
-        this.layerInput = neurons;
-        let layerOutput = Matrix.multiplyVector(this.weights,neurons);
-        layerOutput = addVectors(layerOutput,this.biases);
+    forward(layerInput) {
+        this.layerInput = layerInput;
+        let layerOutput = Matrix.multiplyVector(this.weights, layerInput);
+        layerOutput = addVectors(layerOutput, this.biases);
         return layerOutput;
     }
 
     backward(outputCost) {
         this.outputCost = outputCost;
-        return Matrix.multiplyVector(Matrix.transpose(this.weights),outputCost);
+        return Matrix.multiplyVector(Matrix.transpose(this.weights), outputCost);
     }
 
     updateWeights(learningRate) {
@@ -44,7 +44,7 @@ class DenseLayer extends Layer {
 
 class ActivationLayer extends Layer {
     constructor(size) {
-        super(size,size);
+        super(size, size);
         this.layerInput = null;
         this.layerOutput = null;
         this.outputCost = null;
