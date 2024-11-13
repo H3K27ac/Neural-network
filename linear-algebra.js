@@ -4,39 +4,36 @@ class Vector {
     }
 
     static add(vector1,vector2) {
-        if (vector1.elements.length !== vector2.elements.length); // Error
-        for (let i = 0; i < vector1.elements.length; i++) {
-            vector1.elements[i] += vector2.elements[i];
-        }
-        return vector1;
+        if (vector1.elements.length !== vector2.elements.length) {} // Error
+        const result = vector1.elements.map((value, index) => value + vector2.elements[index]);
+        return new Vector(result);
     }
 }
 
 class Matrix {
-    constructor(elements,stride) {
+    constructor(elements,columns) {
         this.elements = elements;
-        this.stride = stride;
+        this.columns = columns;
+        this.rows = elements.length / stride;
     }
 
     static multiplyVector(matrix,vector) {
         let outputVector = [];
-        const rows = matrix.elements.length / matrix.stride;
-        for (let i = 0; i < rows; i++) {
+        for (let i = 0; i < matrix.rows; i++) {
             let sum = 0;
-            for (let j = 0; j < matrix.stride; j++) {
-                sum += matrix.elements[i * matrix.stride + j] * vector.elements[j];
+            for (let j = 0; j < matrix.columns; j++) {
+                sum += matrix.elements[i * matrix.columns + j] * vector.elements[j];
             }
             outputVector.push(sum);
         }
         return new Vector(outputVector);
     }
 
-    static matrixTranspose(matrix) {
+    static transpose(matrix) {
         let outputMatrix = new Array(matrix.elements.length);
-        const rows = matrix.elements.length / matrix.stride;
-        for (let i = 0; i < rows; i++) {
-            for (let j = 0; j < matrix.stride; j++) {
-                outputMatrix[j * rows + i] = matrix[i * matrix.stride + j];
+        for (let i = 0; i < matrix.rows; i++) {
+            for (let j = 0; j < matrix.columns; j++) {
+                outputMatrix[j * matrix.rows + i] = matrix[i * matrix.columns + j];
             }
         }
         return new Matrix(outputMatrix,rows);
