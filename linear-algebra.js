@@ -1,13 +1,6 @@
-class Vector {
-    constructor(elements) {
-        this.elements = elements;
-    }
-
-    static add(vector1,vector2) {
-        if (vector1.elements.length !== vector2.elements.length) {} // Error
-        const result = vector1.elements.map((value, index) => value + vector2.elements[index]);
-        return new Vector(result);
-    }
+function addVectors(vector1,vector2) {
+    if (vector1.length !== vector2.length) {} // Error
+    return vector1.map((value, index) => value + vector2[index]);
 }
 
 class Matrix {
@@ -22,11 +15,11 @@ class Matrix {
         for (let i = 0; i < matrix.rows; i++) {
             let sum = 0;
             for (let j = 0; j < matrix.columns; j++) {
-                sum += matrix.elements[i * matrix.columns + j] * vector.elements[j];
+                sum += matrix.elements[i * matrix.columns + j] * vector[j];
             }
             outputVector.push(sum);
         }
-        return new Vector(outputVector);
+        return outputVector;
     }
 
     static transpose(matrix) {
@@ -36,6 +29,6 @@ class Matrix {
                 outputMatrix[j * matrix.rows + i] = matrix[i * matrix.columns + j];
             }
         }
-        return new Matrix(outputMatrix,rows);
+        return new Matrix(outputMatrix.rows);
     }
 }

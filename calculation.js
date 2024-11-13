@@ -11,10 +11,9 @@ class DenseLayer extends Layer {
         super(inputSize,outputSize);
         this.weights = new Matrix(new Array(inputSize*outputSize).fill(0));
         // this.initializeWeightMatrix(inputSize,outputSize);
-        this.biases = new Vector(new Array(outputSize).fill(0));
+        this.biases = new Array(outputSize).fill(0);
         this.inputNeurons = null;
         this.outputCost = null;
-        this.inputCost = null;
     }
 
     initializeWeightMatrix(inputSize,outputSize) {
@@ -25,13 +24,13 @@ class DenseLayer extends Layer {
     forward(neurons) {
         this.inputNeurons = neurons;
         let layerOutput = Matrix.multiplyVector(this.weights,neurons);
-        layerOutput = Vector.add(layerOutput,this.biases);
+        layerOutput = addVectors(layerOutput,this.biases);
         return layerOutput;
     }
 
     backward(outputCost) {
         this.outputCost = outputCost;
-        this.inputCost = Matrix.multiplyVector(Matrix.transpose(this.weights),outputCost);
+        return Matrix.multiplyVector(Matrix.transpose(this.weights),outputCost);
     }
 
     updateWeights(learningRate) {
