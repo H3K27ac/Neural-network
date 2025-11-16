@@ -17,63 +17,59 @@ const dockTabsCache = new WeakMap(); // areaElement → DockTabs instance
 class DockTabs {
     constructor(areaEl) {
         this.area = areaEl;
+        this.tabBar = areaEl.querySelector('.dock-tabs') || this.createTabBar();
+        this.contentBox = areaEl.querySelector('.dock-content') || this.createContentBox();
+    }
 
-        // Ensure structure exists
-        this.tabBar = areaEl.querySelector('.dock-tabs');
-        this.contentBox = areaEl.querySelector('.dock-content');
+    createTabBar() {
+        const bar = document.createElement('div');
+        bar.className = 'dock-tabs';
+        this.area.appendChild(bar);
+        return bar;
+    }
 
-        // Create if missing
-        if (!this.tabBar) {
-            this.tabBar = document.createElement('div');
-            this.tabBar.className = 'dock-tabs';
-            areaEl.appendChild(this.tabBar);
-        }
-
-        if (!this.contentBox) {
-            this.contentBox = document.createElement('div');
-            this.contentBox.className = 'dock-content';
-            areaEl.appendChild(this.contentBox);
-        }
-
-        this.tabBar.style.display = 'flex';
+    createContentBox() {
+        const content = document.createElement('div');
+        content.className = 'dock-content';
+        this.area.appendChild(content);
+        return content;
     }
 
     addTab(win) {
         const id = win.dataset.id;
 
-        // --- Create tab button ---
         const tab = document.createElement('div');
         tab.className = 'dock-tab';
-        tab.textContent = win.querySelector('header').innerText;
         tab.dataset.win = id;
+        tab.textContent = win.querySelector('header').innerText;
+        this.tabBar.appendChild(tab);
 
-        // --- Create content panel ---
         const panel = document.createElement('div');
         panel.className = 'dock-panel';
         panel.dataset.win = id;
         panel.appendChild(win.querySelector('.window-content').cloneNode(true));
-
-        // Add to DOM
-        this.tabBar.appendChild(tab);
         this.contentBox.appendChild(panel);
 
-        // Activate on click
         tab.onclick = () => this.activate(id);
 
-        // Auto-activate if it's the only one
+        tab.addEventListener('pointerdown', e => {
+            // Only allow dragging if this tab is active
+            if (!tab.classList.contains('active')) return;
+
+            onDown(win, e);
+        });
+
+
         this.activate(id);
     }
 
     removeTab(win) {
         const id = win.dataset.id;
-
         const tab = this.tabBar.querySelector(`[data-win="${id}"]`);
         const panel = this.contentBox.querySelector(`[data-win="${id}"]`);
-
         if (tab) tab.remove();
         if (panel) panel.remove();
 
-        // Activate first remaining tab
         const first = this.tabBar.querySelector('.dock-tab');
         if (first) this.activate(first.dataset.win);
         else this.clearActive();
@@ -82,7 +78,6 @@ class DockTabs {
     activate(winId) {
         this.tabBar.querySelectorAll('.dock-tab')
             .forEach(t => t.classList.toggle('active', t.dataset.win === winId));
-
         this.contentBox.querySelectorAll('.dock-panel')
             .forEach(p => p.classList.toggle('active', p.dataset.win === winId));
     }
@@ -92,8 +87,6 @@ class DockTabs {
         this.contentBox.querySelectorAll('.dock-panel').forEach(p => p.classList.remove('active'));
     }
 }
-
-
 
 
 
@@ -138,6 +131,7 @@ function getNearestDockArea() {
 function undock(win) {
     const area = dockMap.get(win);
     if (!area) return;
+    area.style.display = 'none';
 
     const tabs = dockTabsCache.get(area);
     if (tabs) {
@@ -203,22 +197,26 @@ windows.forEach((win, i) => {
     originalSize.set(win, { w: rect.width, h: rect.height });
 
     header.addEventListener('pointerdown', e => {
-        draggedWindow = win;
-
-        undock(win);
-
-        const r = win.getBoundingClientRect();
-        dragOffsetX = e.clientX - r.left;
-        dragOffsetY = e.clientY - r.top;
-
-        win.style.zIndex = ++zIndexCounter;
-
-        showDockAreas();
-
-        document.addEventListener('pointermove', onMove);
-        document.addEventListener('pointerup', onUp);
+        onDown(win, e);
     });
 });
+
+function onDown(win, e) {
+    draggedWindow = win;
+
+    undock(win);
+
+    const r = win.getBoundingClientRect();
+    dragOffsetX = e.clientX - r.left;
+    dragOffsetY = e.clientY - r.top;
+
+    win.style.zIndex = ++zIndexCounter;
+
+    showDockAreas();
+
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+}
 
 function onMove(e) {
     if (!draggedWindow) return;
