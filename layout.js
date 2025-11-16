@@ -251,7 +251,7 @@ function onUp(e) {
     else undock(draggedWindow);
 
     hideDockAreas();
-    dockAreas.forEach(a => a.classList.remove('hovered'));
+    displayDockAreas.forEach(a => a.classList.remove('hovered'));
 
     draggedWindow = null;
     snapTarget = null;
