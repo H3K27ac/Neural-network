@@ -1,28 +1,106 @@
-body {
+
+* {
+    box-sizing: border-box;
+}
+
+body, html {
     font-family: 'Courier New', monospace;
     font-size: 20px;
     text-align: center;
     align-items: center;
+    height: 100%;
     margin: 0;
     padding: 0;
     background-color: black;
     color: white;
 }
 
-.column {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    padding: 10px;
-    box-sizing: border-box;
-    border-right: 2px solid white;
+.container {
+    width: 100%;
     height: 100%;
+    position: relative;
+    overflow: hidden;
+    background: black;
+    color: white;
 }
 
-.panel {
-    background-color: black;
+
+.dockable-window {
+    width: 300px;
+    height: 300px;
+    margin: 0px;
+    background: black;
     border: 1px solid white;
+    border-radius: 8px;
+    position: absolute;
+    transition: top .2s ease, left .2s ease, width .2s ease, height .2s ease;
+}
+
+.dockable-window header {
     padding: 10px;
+    background: #007BFF;
+    color: white;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    touch-action: none;
+    user-select: none;
+    cursor: move;
+}
+
+.dockable-window .content {
+    padding: 20px;
+    height: calc(100% - 40px); /* To account for header height */
+    overflow-y: auto;
+}
+
+/* Docking areas */
+.dock-area {
+    position: absolute;
+    background: rgba(0,0,255,0.2);
+    border: 2px dashed blue;
+    display: none;
+}
+
+.dock-area.hovered {
+    border: 2px solid blue;
+}
+
+.dock-area.top { top: 0; left: 0; right: 0; height: 10%; }
+.dock-area.bottom { bottom: 0; left: 0; right: 0; height: 10%; }
+.dock-area.left { top: 0; bottom: 0; left: 0; width: 10%; }
+.dock-area.right { top: 0; bottom: 0; right: 0; width: 10%; }
+.dock-area.center { top: 20%; left: 20%; width: 60%; height: 60%; }
+
+.dock-area .tabs {
+    height: 28px;
     display: flex;
-    flex-direction: column;
+    background: #ddd;
+}
+
+.dock-area .tabs .tab {
+    padding: 4px 8px;
+    background: #ccc;
+    margin-right: 2px;
+    cursor: pointer;
+}
+
+.dock-area .tabs .tab.active {
+    background: #fff;
+}
+
+.dock-area .tab-content {
+    position: absolute;
+    top: 28px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow: auto;
+}
+
+/* Mobile devices */
+@media (max-width: 768px) {
+    .dockable-window {
+        width: 100%;
+        height: auto;
+    }
 }
