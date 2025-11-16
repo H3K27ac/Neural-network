@@ -1,6 +1,3 @@
-
-
-
 const container = document.querySelector('.container');
 const windows = document.querySelectorAll('.dockable-window');
 const dockAreas = document.querySelectorAll('.dock-area');
@@ -171,11 +168,21 @@ function dockToArea(win, displayArea) {
 
     // CENTER: only one window, no tabs
     if (areaType === 'center') {
-        area.innerHTML = ''; // clear
-        const holder = document.createElement('div');
-        holder.className = 'dock-panel active';
-        holder.appendChild(win.querySelector('.body').cloneNode(true));
-        area.appendChild(holder);
+        let content = area.querySelector('.dock-content');
+
+        if (!content) {
+            content = document.createElement('div');
+            content.className = 'dock-content';
+            area.appendChild(content);
+        }
+
+        content.innerHTML = '';
+
+        const panel = document.createElement('div');
+        panel.className = 'dock-panel active';
+        panel.appendChild(win.querySelector('.body').cloneNode(true));
+        content.appendChild(panel);
+
         return;
     }
 
