@@ -51,7 +51,7 @@ class DockTabs {
         const panel = document.createElement('div');
         panel.className = 'dock-panel';
         panel.dataset.win = id;
-        panel.appendChild(win.querySelector('.body').cloneNode(true));
+        panel.appendChild(win.querySelector('.window-content').cloneNode(true));
 
         // Add to DOM
         this.tabBar.appendChild(tab);
@@ -189,8 +189,6 @@ function dockToArea(win, displayArea) {
     // ----- Other regions: create or use tab system -----
     const tabs = getTabs(area);
     tabs.addTab(win);
-
-    tabs.activate(win.dataset.id);
 }
 
 // Drag Logic
@@ -232,7 +230,7 @@ function onMove(e) {
     draggedWindow.style.left = x + 'px';
     draggedWindow.style.top = y + 'px';
 
-    dockAreas.forEach(a => a.classList.remove('hovered'));
+    displayDockAreas.forEach(a => a.classList.remove('hovered'));
 
     const near = getNearestDockArea();
     if (near) {
