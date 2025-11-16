@@ -165,7 +165,7 @@ function dockToArea(win, displayArea) {
     dockMap.set(win, area);  
 
     win.style.display = 'none';
-    area.computedStyleMap.display = 'block';
+    area.style.display = 'block';
 
     // CENTER: only one window, no tabs
     if (areaType === 'center') {
@@ -181,7 +181,7 @@ function dockToArea(win, displayArea) {
 
         const panel = document.createElement('div');
         panel.className = 'dock-panel active';
-        panel.appendChild(win.querySelector('.body').cloneNode(true));
+        panel.appendChild(win.querySelector('.window-content').cloneNode(true));
         content.appendChild(panel);
 
         return;

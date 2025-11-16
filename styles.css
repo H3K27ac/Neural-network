@@ -67,10 +67,10 @@ body, html {
 
 .dock-area {
     position: absolute;
-    display: none; /* shown only while dragging */
     background: black;
     color: white;
     border: 1px solid white;
+    display: none
 }
 
 .dock-area.top { top: 0; left: 0; right: 0; height: 10%; }
