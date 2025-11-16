@@ -101,8 +101,16 @@ function getTabs(area) {
 }
 
 function showDockAreas() {
-    displayDockAreas.forEach(a => a.style.display = 'block');
+    displayDockAreas.forEach(a => {
+        // Hide center if already occupied
+        if (a.classList.contains('center') && a.querySelector('.dock-panel')) {
+            a.style.display = 'none';
+        } else {
+            a.style.display = 'block';
+        }
+    });
 }
+
 
 function hideDockAreas() {
     displayDockAreas.forEach(a => a.style.display = 'none');
@@ -131,11 +139,14 @@ function getNearestDockArea() {
 function undock(win) {
     const area = dockMap.get(win);
     if (!area) return;
-    area.style.display = 'none';
 
     const tabs = dockTabsCache.get(area);
     if (tabs) {
         tabs.removeTab(win);
+    }
+    const tabCount = tabs.tabBar.querySelectorAll('.dock-tab').length;
+    if (tabCount === 0) {
+        area.style.display = 'none';
     }
 
     dockMap.delete(win);
