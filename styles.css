@@ -85,30 +85,55 @@ body, html {
 .display-dock-area.right  { right: 10px;  top: 40%;  height: 20%; width: 60px; }
 .display-dock-area.center { top: 40%; left: 40%; width: 20%; height: 20%; }
 
-.dock-area .tabs {
-    height: 28px;
+/* TAB BAR */
+.dock-tabs {
     display: flex;
-    background: #ddd;
+    background: black;
+    height: 28px;
+    user-select: none;
+    align-items: center;
+    padding: 0 4px;
+    gap: 4px;
 }
 
-.dock-area .tabs .tab {
-    padding: 4px 8px;
-    background: #ccc;
-    margin-right: 2px;
+/* INDIVIDUAL TAB */
+.dock-tab {
+    background: black;
+    color: white;
+    border: 1px solid white;
+    padding: 4px 10px;
+    border-radius: 4px 4px 0 0;
     cursor: pointer;
 }
 
-.dock-area .tabs .tab.active {
-    background: #fff;
+.dock-tab.active {
+    background: black;
+    color: white;
+    border: 1px solid red;
+    font-weight: bold;
 }
 
-.dock-area .tab-content {
+/* CONTENT REGION */
+.dock-content {
     position: absolute;
+    background: black;
+    color: white;
     top: 28px;
     bottom: 0;
     left: 0;
     right: 0;
     overflow: auto;
+}
+
+/* EACH PANEL */
+.dock-panel {
+    display: none;
+    height: 100%;
+    width: 100%;
+}
+
+.dock-panel.active {
+    display: block;
 }
 
 /* Mobile devices */

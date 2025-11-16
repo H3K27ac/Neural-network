@@ -1,3 +1,6 @@
+
+
+
 const container = document.querySelector('.container');
 const windows = document.querySelectorAll('.dockable-window');
 const dockAreas = document.querySelectorAll('.dock-area');
@@ -12,9 +15,100 @@ let zIndexCounter = 10;
 // --- docking data ---
 const dockMap = new Map();   // window → area
 const originalSize = new Map();
+const dockTabsCache = new WeakMap(); // areaElement → DockTabs instance
+
+class DockTabs {
+    constructor(areaEl) {
+        this.area = areaEl;
+
+        // Ensure structure exists
+        this.tabBar = areaEl.querySelector('.dock-tabs');
+        this.contentBox = areaEl.querySelector('.dock-content');
+
+        // Create if missing
+        if (!this.tabBar) {
+            this.tabBar = document.createElement('div');
+            this.tabBar.className = 'dock-tabs';
+            areaEl.appendChild(this.tabBar);
+        }
+
+        if (!this.contentBox) {
+            this.contentBox = document.createElement('div');
+            this.contentBox.className = 'dock-content';
+            areaEl.appendChild(this.contentBox);
+        }
+
+        this.tabBar.style.display = 'flex';
+    }
+
+    addTab(win) {
+        const id = win.dataset.id;
+
+        // --- Create tab button ---
+        const tab = document.createElement('div');
+        tab.className = 'dock-tab';
+        tab.textContent = win.querySelector('header').innerText;
+        tab.dataset.win = id;
+
+        // --- Create content panel ---
+        const panel = document.createElement('div');
+        panel.className = 'dock-panel';
+        panel.dataset.win = id;
+        panel.appendChild(win.querySelector('.body').cloneNode(true));
+
+        // Add to DOM
+        this.tabBar.appendChild(tab);
+        this.contentBox.appendChild(panel);
+
+        // Activate on click
+        tab.onclick = () => this.activate(id);
+
+        // Auto-activate if it's the only one
+        this.activate(id);
+    }
+
+    removeTab(win) {
+        const id = win.dataset.id;
+
+        const tab = this.tabBar.querySelector(`[data-win="${id}"]`);
+        const panel = this.contentBox.querySelector(`[data-win="${id}"]`);
+
+        if (tab) tab.remove();
+        if (panel) panel.remove();
+
+        // Activate first remaining tab
+        const first = this.tabBar.querySelector('.dock-tab');
+        if (first) this.activate(first.dataset.win);
+        else this.clearActive();
+    }
+
+    activate(winId) {
+        this.tabBar.querySelectorAll('.dock-tab')
+            .forEach(t => t.classList.toggle('active', t.dataset.win === winId));
+
+        this.contentBox.querySelectorAll('.dock-panel')
+            .forEach(p => p.classList.toggle('active', p.dataset.win === winId));
+    }
+
+    clearActive() {
+        this.tabBar.querySelectorAll('.dock-tab').forEach(t => t.classList.remove('active'));
+        this.contentBox.querySelectorAll('.dock-panel').forEach(p => p.classList.remove('active'));
+    }
+}
+
+
+
+
 
 
 // Helper Functions
+
+function getTabs(area) {
+    if (!dockTabsCache.has(area)) {
+        dockTabsCache.set(area, new DockTabs(area));
+    }
+    return dockTabsCache.get(area);
+}
 
 function showDockAreas() {
     displayDockAreas.forEach(a => a.style.display = 'block');
@@ -48,23 +142,18 @@ function undock(win) {
     const area = dockMap.get(win);
     if (!area) return;
 
-    // Remove tab
-    const tabBar = area.querySelector('.tabs');
-    const content = area.querySelector('.tab-content');
-
-    const tab = tabBar.querySelector(`[data-win="${win.dataset.id}"]`);
-    if (tab) tab.remove();
-
-    const iframe = content.querySelector(`[data-win="${win.dataset.id}"]`);
-    if (iframe) iframe.remove();
+    const tabs = dockTabsCache.get(area);
+    if (tabs) {
+        tabs.removeTab(win);
+    }
 
     dockMap.delete(win);
 
-    // Restore floating window
+    // restore floating window size and display
     const size = originalSize.get(win);
-    win.style.width = size.w + 'px';
-    win.style.height = size.h + 'px';
-    win.style.display = 'block';
+    win.style.width = size.w + "px";
+    win.style.height = size.h + "px";
+    win.style.display = "block";
 }
 
 function dockToArea(win, displayArea) {
@@ -80,52 +169,21 @@ function dockToArea(win, displayArea) {
 
     win.style.display = 'none';
 
-    const tabBar = area.querySelector('.tabs');
-    const content = area.querySelector('.tab-content');
-
     // CENTER: only one window, no tabs
     if (areaType === 'center') {
-        if (tabBar) tabBar.style.display = 'none'; 
-        if (content) {
-            content.innerHTML = '';
-            const holder = document.createElement('div');
-            holder.dataset.win = win.dataset.id;
-            holder.appendChild(win.querySelector('.body').cloneNode(true));
-            content.appendChild(holder);
-        }
+        area.innerHTML = ''; // clear
+        const holder = document.createElement('div');
+        holder.className = 'dock-panel active';
+        holder.appendChild(win.querySelector('.body').cloneNode(true));
+        area.appendChild(holder);
         return;
     }
 
-    // Create tab
-    if (tabBar) tabBar.style.display = 'flex';
-    const tab = document.createElement('div');
-    tab.className = 'tab';
-    tab.textContent = win.querySelector('header').innerText;
-    tab.dataset.win = win.dataset.id;
+    // ----- Other regions: create or use tab system -----
+    const tabs = getTabs(area);
+    tabs.addTab(win);
 
-    tab.onclick = () => activateTab(area, tab.dataset.win);
-
-    tabBar.appendChild(tab);
-
-    // Create content frame
-    const panel = document.createElement('div');
-    panel.dataset.win = win.dataset.id;
-    panel.style.width = '100%';
-    panel.style.height = '100%';
-    panel.style.display = 'none';
-    panel.appendChild(win.querySelector('.body').cloneNode(true));
-
-    content.appendChild(panel);
-
-    activateTab(area, win.dataset.id);
-}
-
-function activateTab(area, winId) {
-    const tabs = area.querySelectorAll('.tab');
-    const panels = area.querySelectorAll('.tab-content > div');
-
-    tabs.forEach(t => t.classList.toggle('active', t.dataset.win === winId));
-    panels.forEach(p => p.style.display = (p.dataset.win === winId ? 'block' : 'none'));
+    tabs.activate(win.dataset.id);
 }
 
 // Drag Logic
