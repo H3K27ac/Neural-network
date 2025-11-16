@@ -69,31 +69,31 @@ function undock(win) {
 function dockToArea(win, area) {
     undock(win);
 
-    const type = [...area.classList].find(c =>
-        ['top','bottom','left','right','center'].includes(c)
-    );
+    dockMap.set(win, area);   // ✔ store actual element, no more strings
 
-    dockMap.set(win, type);
-
-    // Hide floating window
     win.style.display = 'none';
 
     const tabBar = area.querySelector('.tabs');
     const content = area.querySelector('.tab-content');
+    const areaType = [...area.classList].find(c =>
+        ['top','bottom','left','right','center'].includes(c)
+    );
 
-    // For center, no tabs – only one window allowed
-    if (type === 'center') {
-        tabBar.style.display = 'none';
-        content.innerHTML = '';
-        const holder = document.createElement('div');
-        holder.dataset.win = win.dataset.id;
-        holder.appendChild(win.querySelector('.body').cloneNode(true));
-        content.appendChild(holder);
+    // CENTER: only one window, no tabs
+    if (areaType === 'center') {
+        if (tabBar) tabBar.style.display = 'none'; 
+        if (content) {
+            content.innerHTML = '';
+            const holder = document.createElement('div');
+            holder.dataset.win = win.dataset.id;
+            holder.appendChild(win.querySelector('.body').cloneNode(true));
+            content.appendChild(holder);
+        }
         return;
     }
 
     // Create tab
-    tabBar.style.display = 'flex';
+    if (tabBar) tabBar.style.display = 'flex';
     const tab = document.createElement('div');
     tab.className = 'tab';
     tab.textContent = win.querySelector('header').innerText;
