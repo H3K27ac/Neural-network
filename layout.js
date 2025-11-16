@@ -101,9 +101,10 @@ function getTabs(area) {
 }
 
 function showDockAreas() {
+    const centerOccupied = dockAreas[4].querySelector('.dock-panel') ? true : false;
     displayDockAreas.forEach(a => {
         // Hide center if already occupied
-        if (a.classList.contains('center') && a.querySelector('.dock-panel')) {
+        if (centerOccupied && a.classList.contains('center')) {
             a.style.display = 'none';
         } else {
             a.style.display = 'block';
@@ -113,7 +114,10 @@ function showDockAreas() {
 
 
 function hideDockAreas() {
-    displayDockAreas.forEach(a => a.style.display = 'none');
+    displayDockAreas.forEach(a => {
+        a.style.display = 'none';
+        a.classList.remove('hovered');
+    });
 }
 
 function getNearestDockArea() {
@@ -259,7 +263,6 @@ function onUp(e) {
     else undock(draggedWindow);
 
     hideDockAreas();
-    displayDockAreas.forEach(a => a.classList.remove('hovered'));
 
     draggedWindow = null;
     snapTarget = null;
