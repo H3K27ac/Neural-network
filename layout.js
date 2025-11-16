@@ -1,6 +1,7 @@
 const container = document.querySelector('.container');
 const windows = document.querySelectorAll('.dockable-window');
 const dockAreas = document.querySelectorAll('.dock-area');
+const displayDockAreas = document.querySelectorAll('.display-dock-area');
 
 let draggedWindow = null;
 let dragOffsetX = 0;
@@ -16,11 +17,11 @@ const originalSize = new Map();
 // Helper Functions
 
 function showDockAreas() {
-    dockAreas.forEach(a => a.style.display = 'block');
+    displayDockAreas.forEach(a => a.style.display = 'block');
 }
 
 function hideDockAreas() {
-    dockAreas.forEach(a => a.style.display = 'none');
+    displayDockAreas.forEach(a => a.style.display = 'none');
 }
 
 function getNearestDockArea() {
@@ -28,7 +29,7 @@ function getNearestDockArea() {
     let nearest = null;
     let distMin = 99999;
 
-    dockAreas.forEach(area => {
+    displayDockAreas.forEach(area => {
         const r = area.getBoundingClientRect();
         const dx = (win.left + win.width/2) - (r.left + r.width/2);
         const dy = (win.top + win.height/2) - (r.top + r.height/2);
@@ -66,18 +67,21 @@ function undock(win) {
     win.style.display = 'block';
 }
 
-function dockToArea(win, area) {
+function dockToArea(win, displayArea) {
     undock(win);
 
-    dockMap.set(win, area);   // ✔ store actual element, no more strings
+    const areaType = [...displayArea.classList].find(c =>
+        ['top','bottom','left','right','center'].includes(c)
+    );
+
+    const area = document.querySelector(`.dock-area.${areaType}`);
+
+    dockMap.set(win, area);  
 
     win.style.display = 'none';
 
     const tabBar = area.querySelector('.tabs');
     const content = area.querySelector('.tab-content');
-    const areaType = [...area.classList].find(c =>
-        ['top','bottom','left','right','center'].includes(c)
-    );
 
     // CENTER: only one window, no tabs
     if (areaType === 'center') {
@@ -176,6 +180,7 @@ function onMove(e) {
 
 function onUp(e) {
     if (!draggedWindow) return;
+
 
     if (snapTarget) dockToArea(draggedWindow, snapTarget);
     else undock(draggedWindow);
