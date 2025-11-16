@@ -165,6 +165,7 @@ function dockToArea(win, displayArea) {
     dockMap.set(win, area);  
 
     win.style.display = 'none';
+    area.computedStyleMap.display = 'block';
 
     // CENTER: only one window, no tabs
     if (areaType === 'center') {
