@@ -30,10 +30,10 @@ class DenseLayer extends Layer {
         this.weights = new Matrix(w, this.inputSize, this.outputSize);
     }
 
-    forward(layerInput) {
+    async forward(layerInput) {
         this.layerInput = layerInput;
 
-        let layerOutput = this.weights.multiplyVector(layerInput);
+        let layerOutput = await this.weights.multiply(layerInput);
 
         // Add biases
         layerOutput.add(this.biases);
@@ -41,15 +41,15 @@ class DenseLayer extends Layer {
         return layerOutput;
     }
 
-    backward(outputCost) {
+    async backward(outputCost) {
         this.outputCost = outputCost;
 
         const Wt = this.weights.transpose();
-        return Wt.multiplyVector(outputCost);
+        return await Wt.multiply(outputCost);
     }
 
-    updateWeights(learningRate) {
-        const scaledGrad = this.outputCost.scale(learningRate); // modifies outputCost
+    updateWeights(learningRate, batchSize) {
+        const scaledGrad = this.outputCost.scale(learningRate / batchSize); // modifies outputCost
         const dW = this.layerInput.outer(scaledGrad);
 
         this.weights.data.set(
@@ -57,9 +57,9 @@ class DenseLayer extends Layer {
         );
     }
 
-    updateBiases(learningRate) {
+    updateBiases(learningRate, batchSize) {
         this.biases.add(
-            this.outputCost.scale(learningRate)
+            this.outputCost.scale(learningRate / batchSize)
         );
     }
 }
@@ -112,6 +112,7 @@ class Network {
         this.layers = [];
         this.outputNeurons = null;
         this.learningRate = 0.01;
+        this.batchSize = 1;
     }
 
     initializeArchitecture(architecture) {
@@ -149,8 +150,8 @@ class Network {
     updateParameters() {
         for (let layer of this.layers) {
             if (layer instanceof DenseLayer) {
-                layer.updateWeights(this.learningRate);
-                layer.updateBiases(this.learningRate);
+                layer.updateWeights(this.learningRate, this.batchSize);
+                layer.updateBiases(this.learningRate, this.batchSize);
             }
         }
     }
@@ -182,7 +183,7 @@ class Network {
             }
         }
         
-        if (this.outputNeurons) neurons = neurons.concat(this.outputNeurons.data);
+        // if (this.outputNeurons) neurons = neurons.concat(this.outputNeurons.data);
 
         return neurons;
     }
