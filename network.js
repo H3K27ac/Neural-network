@@ -1,7 +1,7 @@
 const svgNS = "http://www.w3.org/2000/svg";
 const svg = document.getElementById("network-container");
 
-/* Config / ranges (similar to your original variables) */
+/* Config / ranges */
 let weightRange = 1.0;
 let biasRange = 1.0;
 let neuronRange = 1.0;
@@ -357,7 +357,7 @@ function UpdateColor() {
   const lastLayer = structure.length - 1;
   const tOffset = neuronOffsets[lastLayer];
   const targetsVis = computeLayout(structure)[lastLayer].coords;
-  for (let p=0;p<targetsVis.length;p++){
+  for (let p = 0; p < targetsVis.length; p++){
     const j = targetsVis[p].j;
     const circle = document.getElementById(`target ${j}`);
     const text = document.getElementById(`targetvalue ${j}`);
@@ -403,16 +403,13 @@ function UpdateColor() {
   }
 }
 
-/* Public buttons for debugging */
-document.getElementById("btn-redraw").addEventListener("click", ()=>DrawNN());
-document.getElementById("btn-update").addEventListener("click", ()=>UpdateColor());
-document.getElementById("btn-delete").addEventListener("click", ()=>DeleteNN());
 
-/* Redraw on resize to re-layout coordinates */
+/* Redraw on resize to re-layout coordinates 
 window.addEventListener("resize", () => {
   // Keep the viewBox fixed; you may want to change viewBox based on svg.clientWidth/clientHeight
   DrawNN();
 });
+*/
 
 /* Initial draw */
 DrawNN();
