@@ -127,4 +127,54 @@ class Network {
     meanSquaredError(targets) {
         return targets.map((value, index) => Math.pow(value - this.outputNeurons[index], 2)).reduce((sum, value) => sum + value, 0) / targets.length;
     }
+
+    getNeurons() {
+        let neurons = [];
+
+        for (let layer of this.layers) {
+            if (layer instanceof DenseLayer) {
+                neurons = neurons.concat(layer.layerOutput);
+            }
+        }
+        
+        if (this.outputNeurons) neurons = neurons.concat(this.outputNeurons);
+
+        return neurons;
+    }
+
+    getWeights() {
+        let weights = [];
+
+        for (let layer of this.layers) {
+            if (layer instanceof DenseLayer) {
+                weights = weights.concat(layer.weights);
+            }
+        }
+
+        return weights;
+    }
+
+    getBiases() {
+        let biases = [];
+
+        for (let layer of this.layers) {
+            if (layer instanceof DenseLayer) {
+                biases = biases.concat(layer.biases);
+            }
+        }
+
+        return biases;
+    }
+
+    getStructure() {
+        let structure = [this.layers[0].inputSize];
+
+        for (let layer of this.layers) {
+            if (layer instanceof DenseLayer) {
+                structure.push(layer.outputSize);
+            }
+        }
+
+        return structure;
+    }
 }
