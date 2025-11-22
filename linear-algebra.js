@@ -32,7 +32,7 @@ class GPUBackend {
             mappedAtCreation: true,
         });
 
-        new Float64Array(buffer.getMappedRange()).set(arr);
+        new Float32Array(buffer.getMappedRange()).set(arr);
         buffer.unmap();
         return buffer;
     }
@@ -48,7 +48,7 @@ class GPUBackend {
         this.queue.submit([commandEncoder.finish()]);
 
         await out.mapAsync(GPUMapMode.READ);
-        return new Float64Array(out.getMappedRange()).slice();
+        return new Float32Array(out.getMappedRange()).slice();
     }
 
     // --- GPU Compute: Matrix Multiply ---
@@ -124,13 +124,13 @@ GPU.init();
 
 class Vector {
     constructor(data) {
-        // Accept array or Float64Array
-        this.data = data instanceof Float64Array ? data : new Float64Array(data);
+        // Accept array or Float32Array
+        this.data = data instanceof Float32Array ? data : new Float32Array(data);
         this.length = this.data.length;
     }
 
     static fromLength(n) {
-        return new Vector(new Float64Array(n));
+        return new Vector(new Float32Array(n));
     }
 
     // --- Basic arithmetic (in-place operations) ---
@@ -203,7 +203,7 @@ class Vector {
 // Row-major matrix
 class Matrix {
     constructor(data, rows, cols) {
-        this.data = data instanceof Float64Array ? data : new Float64Array(data);
+        this.data = data instanceof Float32Array ? data : new Float32Array(data);
         this.rows = rows;
         this.cols = cols;
 
@@ -212,13 +212,13 @@ class Matrix {
     }
 
     static zeros(rows, cols) {
-        return new Matrix(new Float64Array(rows * cols), rows, cols);
+        return new Matrix(new Float32Array(rows * cols), rows, cols);
     }
 
     static outerProduct(v1, v2) {
         const rows = v1.length;
         const cols = v2.length;
-        const out = new Float64Array(rows * cols);
+        const out = new Float32Array(rows * cols);
 
         const a = v1.data, b = v2.data;
         let index = 0;
@@ -237,7 +237,7 @@ class Matrix {
         if (vec.length !== this.cols)
             throw new Error("Vector length must match matrix columns");
 
-        const out = new Float64Array(this.rows);
+        const out = new Float32Array(this.rows);
         const d = this.data, v = vec.data;
         const cols = this.cols;
 
@@ -271,7 +271,7 @@ class Matrix {
 
         // --- CPU fallback ---
         const a = this.data, b = mat.data;
-        const out = new Float64Array(this.rows * mat.cols);
+        const out = new Float32Array(this.rows * mat.cols);
 
         const R = this.rows, C = this.cols, C2 = mat.cols;
 
@@ -298,7 +298,7 @@ class Matrix {
         if (m.rows !== this.rows || m.cols !== this.cols)
             throw new Error("Matrix dimensions must match");
 
-        const out = new Float64Array(this.data.length);
+        const out = new Float32Array(this.data.length);
         const a = this.data, b = m.data;
 
         for (let i = 0; i < a.length; i++) out[i] = a[i] + b[i];
@@ -310,7 +310,7 @@ class Matrix {
         if (m.rows !== this.rows || m.cols !== this.cols)
             throw new Error("Matrix dimensions must match");
 
-        const out = new Float64Array(this.data.length);
+        const out = new Float32Array(this.data.length);
         const a = this.data, b = m.data;
 
         for (let i = 0; i < a.length; i++) out[i] = a[i] - b[i];
@@ -322,7 +322,7 @@ class Matrix {
 
     transpose() {
         const rows = this.rows, cols = this.cols;
-        const out = new Float64Array(rows * cols);
+        const out = new Float32Array(rows * cols);
         const a = this.data;
 
         let idx = 0;
@@ -332,5 +332,22 @@ class Matrix {
             }
         }
         return new Matrix(out, cols, rows);
+    }
+
+    sumRows() {
+        const rows = this.rows, cols = this.cols;
+        const out = new Float32Array(rows);
+        const a = this.data;
+        let sum = 0;
+
+        for (let i = 0; i < rows; i++) {
+            sum = 0;
+            for (let j = 0; j < cols; j++) {
+                sum += a[i * cols + j];
+            }
+            out[i] = sum;
+        }
+
+        return new Vector(out);
     }
 }

@@ -10,8 +10,8 @@ class DenseLayer extends Layer {
     constructor(inputSize, outputSize) {
         super(inputSize, outputSize);
 
-        this.weights = Matrix.zeros(inputSize, outputSize);  // Float64Array
-        this.biases  = Vector.fromLength(outputSize);        // Float64Array
+        this.weights = Matrix.zeros(inputSize, outputSize);  // Float32Array
+        this.biases  = Vector.fromLength(outputSize);        // Float32Array
 
         this.weightRange = 1;
         this.biasRange = 1
@@ -23,7 +23,7 @@ class DenseLayer extends Layer {
     xavierInitialization() {
         const limit = Math.sqrt(6 / (this.inputSize + this.outputSize));
 
-        const w = new Float64Array(this.inputSize * this.outputSize);
+        const w = new Float32Array(this.inputSize * this.outputSize);
         for (let i = 0; i < w.length; i++)
             w[i] = Math.random() * 2 * limit - limit;
 
@@ -49,7 +49,7 @@ class DenseLayer extends Layer {
     }
 
     updateWeights(learningRate, batchSize) {
-        const scaledGrad = this.outputCost.scale(learningRate / batchSize); // modifies outputCost
+        const scaledGrad = this.outputCost.sumRows().scale(learningRate / batchSize);
         const dW = this.layerInput.outer(scaledGrad);
 
         this.weights.data.set(
@@ -59,7 +59,7 @@ class DenseLayer extends Layer {
 
     updateBiases(learningRate, batchSize) {
         this.biases.add(
-            this.outputCost.scale(learningRate / batchSize)
+            this.outputCost.sumRows().scale(learningRate / batchSize)
         );
     }
 }
