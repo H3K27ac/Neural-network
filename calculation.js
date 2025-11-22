@@ -9,76 +9,103 @@ class Layer {
 class DenseLayer extends Layer {
     constructor(inputSize, outputSize) {
         super(inputSize, outputSize);
-        this.weights = new Array(inputSize * outputSize).fill(0);
-        this.biases = new Array(outputSize).fill(0);
+
+        this.weights = Matrix.zeros(inputSize, outputSize);  // Float64Array
+        this.biases  = Vector.fromLength(outputSize);        // Float64Array
+
         this.weightRange = 1;
         this.biasRange = 1
+
         this.layerInput = null;
         this.outputCost = null;
     }
 
-    xavierInitalization() {
+    xavierInitialization() {
         const limit = Math.sqrt(6 / (this.inputSize + this.outputSize));
-        this.weights = new Matrix(this.weights.map(() => Math.random() * 2 * limit - limit), this.inputSize);
+
+        const w = new Float64Array(this.inputSize * this.outputSize);
+        for (let i = 0; i < w.length; i++)
+            w[i] = Math.random() * 2 * limit - limit;
+
+        this.weights = new Matrix(w, this.inputSize, this.outputSize);
     }
 
     forward(layerInput) {
         this.layerInput = layerInput;
-        let layerOutput = Matrix.multiplyVector(this.weights, layerInput);
-        layerOutput = addVectors(layerOutput, this.biases);
+
+        let layerOutput = this.weights.multiplyVector(layerInput);
+
+        // Add biases
+        layerOutput.add(this.biases);
+
         return layerOutput;
     }
 
     backward(outputCost) {
         this.outputCost = outputCost;
-        return Matrix.multiplyVector(Matrix.transpose(this.weights), outputCost);
+
+        const Wt = this.weights.transpose();
+        return Wt.multiplyVector(outputCost);
     }
 
     updateWeights(learningRate) {
-        this.weights = Matrix.elementWiseSum(outerProduct(scalarMultiplyVector(this.outputCost, learningRate), this.layerInput), this.weights);
+        const scaledGrad = this.outputCost.scale(learningRate); // modifies outputCost
+        const dW = this.layerInput.outer(scaledGrad);
+
+        this.weights.data.set(
+            this.weights.add(dW).data
+        );
     }
 
     updateBiases(learningRate) {
-        this.biases = addVectors(this.biases,scalarMultiplyVector(this.outputCost,learningRate));
+        this.biases.add(
+            this.outputCost.scale(learningRate)
+        );
     }
 }
 
 class ActivationLayer extends Layer {
     constructor(size) {
         super(size, size);
-        this.layerInput = null;
+
+        this.layerInput  = null;
         this.layerOutput = null;
-        this.outputCost = null;
+        this.outputCost  = null;
+
         this.activationFunction = null;
         this.derivativeFunction = null;
     }
 
-    initializeActivationFunction(activationType) {
-        this.activationFunction = activationFunctions[activationType];
-        this.derivativeFunction = derivativeActivationFunctions[activationType];
+    initializeActivationFunction(type) {
+        this.activationFunction = activationFunctions[type];
+        this.derivativeFunction = derivativeActivationFunctions[type];
 
-        if (!this.activationFunction || !this.derivativeFunction) {} // Error
+        if (!this.activationFunction)
+            throw new Error("Unknown activation: " + type);
     }
 
     forward(layerInput) {
         this.layerInput = layerInput;
-        // Apply activation function
-        this.layerOutput = layerInput.map(this.activationFunction);
+
+        this.layerOutput = this.activationFunction(layerInput.data);
         return this.layerOutput;
     }
 
     backward(outputCost) {
-        this.outputCost = outputCost;
+        // Softmax cross-entropy already has gradient
         if (this.activationFunction === activationFunctions.softmax) {
-            return this.outputCost; // Simplified gradient, cross entropy only
+            this.outputCost = outputCost;
+            return outputCost;
         }
-        // f'(z)
-        return elementWiseVectorProduct(outputCost, this.layerInput.map((value, index) => this.derivativeFunction(value, this.layerOutput[index])));
+
+        this.outputCost = this.derivativeFunction(this.layerInput.data, this.layerOutput.data);
+        return this.outputCost;
     }
 
-    updateWeights() {} // Unused
-    updateBiases() {} // Unused
+    updateWeights() {}
+    updateBiases() {}
 }
+
 
 class Network {
     constructor() {
@@ -88,9 +115,7 @@ class Network {
     }
 
     initializeArchitecture(architecture) {
-        // archiecture = [["type",size],...]
-        for (let i = 0; i < architecture.length; i++) {
-            const [type, ...params] = architecture[i];
+        for (let [type, ...params] of architecture) {
             switch (type) {
                 case "dense":
                     this.layers.push(new DenseLayer(...params));
@@ -99,23 +124,25 @@ class Network {
                     this.layers.push(new ActivationLayer(...params));
                     break;
                 default:
-                    // Error
+                    throw new Error("Unknown layer type: " + type);
             }
         }
     }
 
-    feedForward(inputNeurons) {
+    async feedForward(inputNeurons) {
         let output = inputNeurons;
         for (let layer of this.layers) {
-            output = layer.forward(output);
+            output = await layer.forward(output);
         }
         this.outputNeurons = output;
     }
 
-    backpropagate(targets) {
-        let outputCost = subtractVectors(targets, this.outputNeurons);
+    async backpropagate(targets) {
+        // target - output
+        let outputCost = targets.sub(this.outputNeurons);
+
         for (let i = this.layers.length - 1; i >= 0; i--) {
-            outputCost = this.layers[i].backward(outputCost);
+            outputCost = await this.layers[i].backward(outputCost);
         }
     }
 
@@ -123,19 +150,27 @@ class Network {
         for (let layer of this.layers) {
             if (layer instanceof DenseLayer) {
                 layer.updateWeights(this.learningRate);
-            layer.updateBiases(this.learningRate);
+                layer.updateBiases(this.learningRate);
             }
         }
     }
 
-    train(inputNeurons, targets) {
-        this.feedForward(inputNeurons);
-        this.backpropagate(targets);
+    async train(inputNeurons, targets) {
+        await this.feedForward(inputNeurons);
+        await this.backpropagate(targets);
         this.updateParameters();
     }
 
     meanSquaredError(targets) {
-        return targets.map((value, index) => Math.pow(value - this.outputNeurons[index], 2)).reduce((sum, value) => sum + value, 0) / targets.length;
+        const t = targets.data;
+        const o = this.outputNeurons.data;
+        let sum = 0;
+
+        for (let i = 0; i < t.length; i++) {
+            const diff = t[i] - o[i];
+            sum += diff * diff;
+        }
+        return sum / t.length;
     }
 
     getNeurons() {
@@ -143,11 +178,11 @@ class Network {
 
         for (let layer of this.layers) {
             if (layer instanceof DenseLayer) {
-                neurons = neurons.concat(layer.layerOutput);
+                neurons = neurons.concat(layer.layerOutput.data);
             }
         }
         
-        if (this.outputNeurons) neurons = neurons.concat(this.outputNeurons);
+        if (this.outputNeurons) neurons = neurons.concat(this.outputNeurons.data);
 
         return neurons;
     }
@@ -157,7 +192,7 @@ class Network {
 
         for (let layer of this.layers) {
             if (layer instanceof DenseLayer) {
-                weights = weights.concat(layer.weights);
+                weights = weights.concat(layer.weights.data);
             }
         }
 
@@ -169,7 +204,7 @@ class Network {
 
         for (let layer of this.layers) {
             if (layer instanceof DenseLayer) {
-                biases = biases.concat(layer.biases);
+                biases = biases.concat(layer.biases.data);
             }
         }
 
