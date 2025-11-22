@@ -67,6 +67,9 @@ class ActivationLayer extends Layer {
 
     backward(outputCost) {
         this.outputCost = outputCost;
+        if (this.activationFunction === activationFunctions.softmax) {
+            return this.outputCost; // Simplified gradient, cross entropy only
+        }
         // f'(z)
         return elementWiseVectorProduct(outputCost, this.layerInput.map((value, index) => this.derivativeFunction(value, this.layerOutput[index])));
     }
