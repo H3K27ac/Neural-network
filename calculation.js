@@ -11,6 +11,8 @@ class DenseLayer extends Layer {
         super(inputSize, outputSize);
         this.weights = new Array(inputSize * outputSize).fill(0);
         this.biases = new Array(outputSize).fill(0);
+        this.weightRange = 1;
+        this.biasRange = 1
         this.layerInput = null;
         this.outputCost = null;
     }
@@ -85,7 +87,7 @@ class Network {
         this.learningRate = 0.01;
     }
 
-    initializeNetworkArchitecture(architecture) {
+    initializeArchitecture(architecture) {
         // archiecture = [["type",size],...]
         for (let i = 0; i < architecture.length; i++) {
             const [type, ...params] = architecture[i];
@@ -119,9 +121,17 @@ class Network {
 
     updateParameters() {
         for (let layer of this.layers) {
-            layer.updateWeights(this.learningRate);
+            if (layer instanceof DenseLayer) {
+                layer.updateWeights(this.learningRate);
             layer.updateBiases(this.learningRate);
+            }
         }
+    }
+
+    train(inputNeurons, targets) {
+        this.feedForward(inputNeurons);
+        this.backpropagate(targets);
+        this.updateParameters();
     }
 
     meanSquaredError(targets) {
